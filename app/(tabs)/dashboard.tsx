@@ -18,11 +18,11 @@ export default function Dashboard() {
       <View style={styles.button}>
         <Button title="Community Feed" onPress={() => router.push('/(tabs)/community')} />
       </View>
-
       <View style={styles.button}>
         <Button title="Chat" onPress={() => router.push('/(tabs)/chats')} />
       </View>
     </View>
+    
   );
 }
 
