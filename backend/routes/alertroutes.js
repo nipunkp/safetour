@@ -36,4 +36,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.post('/', async (req, res) => {
+  try {
+    const alert = new Alert(req.body);
+    await alert.save();
+
+    res.status(201).json({ message: 'Alert broadcasted successfully' });
+  } catch (err) {
+    console.error('Alert create error:', err);
+    res.status(500).json({ error: 'Failed to create alert' });
+  }
+});
+
 module.exports = router;

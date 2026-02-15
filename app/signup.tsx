@@ -1,16 +1,24 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    Button,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Button,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from 'react-native';
+import { createSignupStyles } from '../app/styles/signupStyles';
+import { DarkColors, LightColors } from '../app/theme/colors';
 import API from './api';
 
+
 export default function Signup() {
+  const scheme = useColorScheme();
+  const colors = scheme === 'dark' ? DarkColors : LightColors;
+  const styles = createSignupStyles(colors);
+
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [email, setEmail] = useState('');

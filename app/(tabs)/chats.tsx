@@ -1,11 +1,18 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View, useColorScheme, } from 'react-native';
 import API from '../api';
+import { createChatListStyles } from '../styles/chatstyles';
+import { DarkColors, LightColors } from '../theme/colors';
 
 export default function NearbyUsers() {
+  const scheme = useColorScheme();
+  const colors = scheme === 'dark' ? DarkColors : LightColors;
+  const styles = createChatListStyles(colors);
+  
   const [users, setUsers] = useState<any[]>([]);
   const [myId, setMyId] = useState<string | null>(null);
   const router = useRouter();
@@ -45,37 +52,46 @@ export default function NearbyUsers() {
   }, []);
 
   return (
-    <FlatList
-      data={users}
-      keyExtractor={item => item._id}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: '/(tabs)/chatscreen',
-              params: { userId: item._id, name: item.name },
-            })
-          }
-        >
-          <View
-            style={{
-              padding: 15,
-              borderBottomWidth: 1,
-              borderColor: '#ddd',
-            }}
+    <View style={styles.container}>
+      <Text style={styles.header}>💬 Nearby Travelers</Text>
+
+      <FlatList
+        data={users}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              router.push({
+                pathname: '/chatscreen',
+                params: { userId: item._id },
+              })
+            }
           >
-            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
-              {item.name}
-            </Text>
-            <Text style={{ color: 'gray' }}>Tap to chat</Text>
-          </View>
-        </TouchableOpacity>
-      )}
-      ListEmptyComponent={
-        <Text style={{ textAlign: 'center', marginTop: 40 }}>
-          No nearby tourists found
-        </Text>
-      }
-    />
+            <View style={styles.avatar}>
+              <Ionicons
+                name="person"
+                size={20}
+                color="#fff"
+              />
+            </View>
+
+            <View style={styles.textContainer}>
+              <Text style={styles.name}>
+                {item.name}
+              </Text>
+              <Text style={styles.subtitle}>
+                Tap to start chatting
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={
+          <Text style={styles.empty}>
+            No nearby tourists found
+          </Text>
+        }
+      />
+    </View>
   );
 }

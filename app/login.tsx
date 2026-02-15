@@ -9,11 +9,19 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from 'react-native';
+import { createLoginStyles } from '../app/styles/loginstyle';
+import { DarkColors, LightColors } from '../app/theme/colors';
 import API from './api';
+import { signInFirebase } from './services/firebase';
 
 export default function Login() {
+  const scheme = useColorScheme();
+  const colors = scheme === 'dark' ? DarkColors : LightColors;
+  const styles = createLoginStyles(colors);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
@@ -55,6 +63,7 @@ export default function Login() {
           longitude: loc.coords.longitude,
         })
       );
+      await signInFirebase();
 
       // 5️⃣ Route based on role
       if (res.data.role === 'authority') {
@@ -88,13 +97,16 @@ export default function Login() {
         secureTextEntry
       />
 
-      <View style={styles.buttonBox}>
-        <Button title="Login" onPress={login} />
+      <View style={styles.buttonContainer}>
+        <Button title="Login" onPress={login} color={colors.primary} />
       </View>
 
       <TouchableOpacity onPress={() => router.push('/signup')}>
-        <Text style={styles.signupText}>
-          Don’t have an account? <Text style={styles.signupLink}>Sign up</Text>
+      <Text style={{ color: colors.textSecondary, marginTop: 20 }}>
+          Don’t have an account?{' '}
+          <Text style={{ color: colors.primary, fontWeight: 'bold' }}>
+            Sign up
+          </Text>
         </Text>
       </TouchableOpacity>
     </View>

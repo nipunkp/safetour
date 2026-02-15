@@ -14,6 +14,12 @@ const DangerZone = require('./models/dangerzone');
 const Alert = require('./models/alert');
 const alertRoutes = require('./routes/alertroutes');
 const userRoutes = require('./routes/userRoutes');
+const postRoutes = require('./routes/postroutes');
+
+require('dotenv').config();
+
+const infoRoutes =require('./routes/infoRoutes')
+
 
 
 
@@ -24,6 +30,8 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use('/api/alerts', alertRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/info',infoRoutes);
+app.use('/api/posts',postRoutes)
 mongoose
   .connect('mongodb://127.0.0.1:27017/safetour')
   .then(() => console.log('MongoDB connected'))
@@ -99,7 +107,7 @@ app.get('/api/sos', async (req, res) => {
 
 
 // Save new post
-app.post('/api/posts', async (req, res) => {
+/*app.post('/api/posts', async (req, res) => {
   try {
     const post = new Post(req.body);
     await post.save();
@@ -115,7 +123,7 @@ app.post('/api/posts', async (req, res) => {
 app.get('/api/posts', async (req, res) => {
   const posts = await Post.find().sort({ _id: -1 });
   res.json(posts);
-});
+});*/
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -151,7 +159,7 @@ app.get('/api/zones', async (req, res) => {
   res.json(zones);
 });
 
-app.post('/api/alerts', async (req, res) => {
+/*app.post('/api/alerts', async (req, res) => {
   try {
     const alert = new Alert(req.body);
     await alert.save();
@@ -166,7 +174,7 @@ app.get('/api/alerts', async (req, res) => {
   const alerts = await Alert.find().sort({ createdAt: -1 });
   res.json(alerts);
 });
-
+*/
 
 
 const PORT = 5000;

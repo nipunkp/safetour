@@ -1,18 +1,24 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Button,
-  StyleSheet,
   Text,
+  TouchableOpacity,
   View,
+  useColorScheme,
 } from 'react-native';
 import API from '../api';
+import { createSosStyles } from '../styles/sosStyles';
+import { DarkColors, LightColors } from '../theme/colors';
 
 
   export default function SosScreen() {
+    const scheme = useColorScheme();
+    const colors = scheme === 'dark' ? DarkColors : LightColors;
+    const styles = createSosStyles(colors);
     const [user, setUser] = useState<{ name: string; age: number } | null>(null);
     const [loading, setLoading] = useState(false);
     const [type, setType] = useState<string | null>(null);
@@ -62,54 +68,61 @@ import API from '../api';
         `Emergency Type: ${type}\nYour location has been shared`
       );
     };
-  
+    const types = [
+      { label: 'Medical', icon: 'medkit' },
+      { label: 'Accident', icon: 'car-sport' },
+      { label: 'Crime', icon: 'shield' },
+    ];
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>🚨 SOS Emergency</Text>
-        {!type&&(
-        <View style={styles.buttons}>
-          <Button title="Medical" onPress={() => setType('Medical')} />
-          <Button title="Accident" onPress={() => setType('Accident')} />
-          <Button title="Crime" onPress={() => setType('Crime')} />
-        </View>
-        )}
-        <Text style={styles.selected}>
-          Selected: {type ?? 'None'}
+        <Text style={styles.header}>🚨 SOS Emergency</Text>
+        <Text style={styles.subHeader}>
+          Choose the type of emergency
         </Text>
-        {type && (
-            <Button
-            title="Change Emergency Type"
-            onPress={() => setType(null)}
-             />
-        )}
+  
+        <View style={styles.typeContainer}>
+          {types.map((item) => (
+            <TouchableOpacity
+              key={item.label}
+              style={[
+                styles.typeCard,
+                type === item.label && styles.activeCard,
+              ]}
+              onPress={() => setType(item.label)}
+            >
+              <Ionicons
+                name={item.icon as any}
+                size={26}
+                color={
+                  type === item.label
+                    ? '#fff'
+                    : colors.primary
+                }
+              />
+              <Text
+                style={[
+                  styles.typeText,
+                  type === item.label && { color: '#fff' },
+                ]}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+  
         {loading ? (
-          <ActivityIndicator size="large" color="red" />
+          <ActivityIndicator size="large" color={colors.danger} />
         ) : (
-          <Button title="SEND SOS" color="red" onPress={sendSOS} />
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={sendSOS}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.sendText}>SEND SOS</Text>
+          </TouchableOpacity>
         )}
       </View>
     );
   }
   
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      padding: 20,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      textAlign: 'center',
-      marginBottom: 20,
-      color: 'red',
-    },
-    buttons: {
-      marginBottom: 15,
-    },
-    selected: {
-      textAlign: 'center',
-      marginBottom: 15,
-      fontWeight: 'bold',
-    },
-  });

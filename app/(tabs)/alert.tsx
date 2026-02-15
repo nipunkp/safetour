@@ -1,93 +1,104 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  RefreshControl,
+  ScrollView,
+  Text,
+  useColorScheme,
+  View,
+} from 'react-native';
 import API from '../api';
+import { createAlertStyles } from '../styles/alertstyles';
+import { DarkColors, LightColors } from '../theme/colors';
 
 type AlertItem = {
   _id: string;
   title: string;
   message: string;
+  createdAt?: string;
 };
 
 export default function Alerts() {
+  const scheme = useColorScheme();
+  const colors = scheme === 'dark' ? DarkColors : LightColors;
+  const styles = createAlertStyles(colors);
+
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadAlerts = async () => {
+    const { status } =
+      await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const loc = await Location.getCurrentPositionAsync({});
+
+    const res = await API.get('/api/alerts', {
+      params: {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      },
+    });
+
+    setAlerts(res.data);
+  };
 
   useEffect(() => {
-    const loadAlerts = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-
-      const loc = await Location.getCurrentPositionAsync({});
-
-      const res = await API.get('/api/alerts', {
-        params: {
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-        },
-      });
-
-      setAlerts(res.data);
-    };
-
     loadAlerts();
   }, []);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAlerts();
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.heading}>🚨 Safety Alerts Nearby</Text>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      }
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.header}> Safety Alerts</Text>
 
       {alerts.length === 0 && (
-        <Text style={styles.noAlert}>No alerts in your area</Text>
+        <Text style={styles.empty}>
+          No alerts in your area
+        </Text>
       )}
 
-      {alerts.map((a) => (
-        <View key={a._id} style={styles.alertCard}>
-          <Text style={styles.alertTitle}>{a.title}</Text>
-          <Text style={styles.alertMessage}>{a.message}</Text>
+      {alerts.map((item) => (
+        <View key={item._id} style={styles.card}>
+          <View style={styles.iconContainer}>
+            <Ionicons
+              name="warning"
+              size={20}
+              color={colors.danger}
+            />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text style={styles.title}>
+              {item.title}
+            </Text>
+            <Text style={styles.message}>
+              {item.message}
+            </Text>
+
+            {item.createdAt && (
+              <Text style={styles.time}>
+                {new Date(item.createdAt).toLocaleString()}
+              </Text>
+            )}
+          </View>
         </View>
       ))}
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f7f9fc',
-    padding: 40,
-  },
-  heading: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    marginTop:20,
-    textAlign: 'center',
-    color: '#b91c1c',
-  },
-  noAlert: {
-    textAlign: 'center',
-    color: '#555',
-    marginTop: 40,
-    fontSize: 16,
-  },
-  alertCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 12,
-    borderLeftWidth: 5,
-    borderLeftColor: '#dc2626',
-    elevation: 2,
-  },
-  alertTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    color: '#991b1b',
-  },
-  alertMessage: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-  },
-});
