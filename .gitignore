@@ -43,3 +43,5 @@ app-example
 /android
 uploads/
 .env
+
+app/services/firebase.ts
