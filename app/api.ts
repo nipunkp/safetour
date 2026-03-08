@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const BASE_URL = 'http://10.55.52.28:5000'; // 👈 CHANGE WHEN NEEDED
+export const BASE_URL = 'https://safetour-582o.onrender.com'; // 👈 CHANGE WHEN NEEDED
 
 const API = axios.create({
   baseURL: BASE_URL,
